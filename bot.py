@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 xrp_client = JsonRpcClient("https://s.altnet.rippletest.net:51234/")  # Use mainnet for real data
 
 # Replace with your Telegram Bot token
-TELEGRAM_TOKEN = "YOUR_BOT_TOKEN"  # Replace this with your token
+TELEGRAM_TOKEN = "7857522311:AAG11rMPc_w8YlVoP5UZN4aJPdkbbRGnT3E"  # Replace this with your token
 
 # Track transaction volume for trending tokens
 token_volume = {}
