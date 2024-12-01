@@ -3,39 +3,48 @@ import os
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from xrpl.clients import JsonRpcClient
-from xrpl.models import AccountInfo
+from xrpl.models import AccountTx
 
 # Set up logging
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# XRP Ledger Client
-xrp_client = JsonRpcClient("https://s.altnet.rippletest.net:51234/")
+# XRP Ledger Client (use mainnet or testnet endpoint)
+xrp_client = JsonRpcClient("https://s.altnet.rippletest.net:51234/")  # Use mainnet for real data
 
-# Replace with your new Telegram Bot token
-TELEGRAM_TOKEN = "7857522311:AAG11rMPc_w8YlVoP5UZN4aJPdkbbRGnT3E"  # Example token (should be kept private)
+# Replace with your Telegram Bot token
+TELEGRAM_TOKEN = "YOUR_BOT_TOKEN"  # Replace this with your token
 
-# Function to get the balance of XRP account
-def get_xrp_balance(account: str):
-    account_info = AccountInfo(account=account, ledger_index="validated")
-    response = xrp_client.request(account_info)
-    if "result" in response:
-        xrp_balance = response["result"]["account_data"]["Balance"]
-        return xrp_balance
-    return None
+# Track transaction volume for trending tokens
+token_volume = {}
+
+# Fetch XRP transactions
+def fetch_transactions(account: str):
+    # Get the latest transactions for the provided account
+    account_tx = AccountTx(account=account, ledger_index="validated", limit=100)
+    response = xrp_client.request(account_tx)
+    return response.get("result", {}).get("transactions", [])
+
+# Process transactions and track token volume
+def process_transactions(transactions):
+    global token_volume
+    for tx in transactions:
+        if "meta" in tx and "TransactionResult" in tx["meta"]:
+            # Look for token transfers in the transaction (IOUs)
+            if tx["tx"]["TransactionType"] == "Payment" and "Amount" in tx["tx"]:
+                amount = tx["tx"]["Amount"]
+                if isinstance(amount, dict):  # Check if the amount is a token (not XRP)
+                    token = amount["currency"]
+                    if token not in token_volume:
+                        token_volume[token] = 0
+                    token_volume[token] += int(amount["value"])  # Sum token volume
+    return token_volume
 
 # Command handler for /start
 def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text("Welcome to the XRP Tending Token Tracker Bot!")
+    update.message.reply_text("Welcome to the XRP Trending Token Tracker Bot!")
 
-# Command handler to track balance
-def track_balance(update: Update, context: CallbackContext) -> None:
+# Command handler for /track_trending
+def track_trending(update: Update, context: CallbackContext) -> None:
     try:
-        account = context.args[0]  # The user provides the XRP account as an argument
-        balance = get_xrp_balance(account)
-        if balance is not None:
-            update.message.reply_text(f"The balance for account {account} is {balance} XRP.")
-        else:
-            update.message.reply_text(f"Could not retrieve balance for account {account}.")
-    except IndexError:
-        update.message.reply_te
+        account = con
