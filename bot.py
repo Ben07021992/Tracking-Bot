@@ -47,4 +47,11 @@ def start(update: Update, context: CallbackContext) -> None:
 # Command handler for /track_trending
 def track_trending(update: Update, context: CallbackContext) -> None:
     try:
-        account = con
+    # Code that might raise an exception
+    account = con
+except SomeError as e:
+    # Handle the error
+    print(f"An error occurred: {e}")
+finally:
+    # Optional, this block will always run, even if an error occurs
+    print("This will always execute.")
