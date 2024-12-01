@@ -1,2 +1,2 @@
-python-telegram-bot==20.0
-xrpl-py==2.6.0
+python-telegram-bot
+xrpl-py
